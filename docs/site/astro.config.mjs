@@ -135,11 +135,7 @@ export default defineConfig({
               slug: 'quickstart',
             },
             {
-              label: 'Build with A2UI',
-              link: '/build-with-a2ui/',
-            },
-            {
-              label: 'Playground',
+              label: 'Playground ↗',
               link: 'https://go.copilotkit.ai/a2ui-playground',
               attrs: {target: '_blank', rel: 'noopener noreferrer'},
             },
