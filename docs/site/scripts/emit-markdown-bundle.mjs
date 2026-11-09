@@ -171,6 +171,15 @@ export function cleanMdxOutsideFences(markdown) {
           'Or follow the [step-by-step walkthrough](/quickstart/step-by-step/).',
         ].join('\n'),
       )
+      .replace(
+        /^\s*<SkillPrompt\s*\/>\s*$/gm,
+        [
+          '',
+          'Have your own app? Paste this prompt into your coding agent to add A2UI to it with the [A2UI agent skill](/skills/a2ui.md):',
+          '`Add A2UI to this app. If you support agent skills, install the A2UI skill with "npx skills add a2ui-project/a2ui"; otherwise read https://a2ui.org/skills/a2ui.md. Then use it to choose the A2UI packages for this project and set them up.`',
+          '',
+        ].join('\n'),
+      )
       .replace(/^\s*<ArchitecturePipelineOverview(?:\s[\s\S]*?)?\/>\s*$/gm, '');
 
     const segmentOut = [];

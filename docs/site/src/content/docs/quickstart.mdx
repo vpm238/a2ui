@@ -5,6 +5,7 @@ description: Run a small A2UI app, a Python agent server with a React web client
 
 import {Aside} from '@astrojs/starlight/components';
 import AgentPrompt from '@components/docs/travel-a2ui/AgentPrompt.astro';
+import SkillPrompt from '@components/docs/travel-a2ui/SkillPrompt.astro';
 import ArchitecturePipelineOverview from '@components/docs/overview/ArchitecturePipelineOverview.astro';
 
 **A2UI** lets an AI agent answer with an interface instead of a paragraph:
@@ -15,6 +16,8 @@ A2UI SDKs. It is simple on purpose: **one Python server** holds the agent, and
 a **React** client (web) and a **Flutter** client (mobile) draw what it sends.
 
 <AgentPrompt />
+
+<SkillPrompt />
 
 <Aside type="note" title="About this sample">
   Travel A2UI lives in A2UI Labs, at

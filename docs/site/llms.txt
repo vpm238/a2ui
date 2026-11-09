@@ -7,6 +7,7 @@ Parallel Markdown editions of documentation pages are available by appending `.m
 ## Agent Harness Skills & Visual Tools
 
 - Agent skills CLI (Claude Code, Gemini CLI, Cursor, Codex, Windsurf): `npx skills add a2ui-project/a2ui`
+- [A2UI agent skill (raw Markdown)](https://a2ui.org/skills/a2ui.md)
 - [Get Help & Agent Skills](https://a2ui.org/get-help/)
 - [Build with A2UI: generative UI spectrum and production stories](https://a2ui.org/build-with-a2ui/)
 - [A2UI Composer & Inspector](https://a2ui-editor.ag-ui.com)

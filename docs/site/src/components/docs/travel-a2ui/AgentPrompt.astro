@@ -92,28 +92,7 @@ const [first] = QUICKSTART_PROMPTS;
 </section>
 
 <script>
-  async function copy(text: string): Promise<boolean> {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      // Without the async clipboard (an insecure origin, an old browser), a
-      // selected textarea and the legacy command still copy.
-      const prevFocus = document.activeElement as HTMLElement | null;
-      const area = document.createElement('textarea');
-      area.value = text;
-      area.setAttribute('readonly', '');
-      area.style.position = 'fixed';
-      area.style.opacity = '0';
-      document.body.append(area);
-      area.select();
-      area.setSelectionRange(0, text.length);
-      const done = document.execCommand('copy');
-      area.remove();
-      prevFocus?.focus();
-      return done;
-    }
-  }
+  import {copyText as copy} from '../../../lib/copy-text';
 
   for (const root of document.querySelectorAll<HTMLElement>('.qs')) {
     const button = root.querySelector<HTMLButtonElement>('[data-qs-copy]')!;
