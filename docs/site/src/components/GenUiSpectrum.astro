@@ -22,11 +22,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   <div class="gs-wrap">
     <div class="gs-header">
       <h2 class="gs-h2">
-        Three patterns. <span class="gs-accent">One generative UI spectrum.</span>
+        Where A2UI fits <span class="gs-accent">in generative UI.</span>
       </h2>
       <p class="gs-sub">
-        Slide across the spectrum to see how the same request turns into different UI, and how A2UI
-        fits at each point.
+        The same request can come back as a pre-built widget, a composed screen, or generated code.
+        Move the slider to see each one and how A2UI handles it.
       </p>
     </div>
 
@@ -384,10 +384,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
                 </li>
               </ul>
               <p class="gs-with">
-                <strong>With A2UI:</strong> The model builds the screen from components in your catalog, and the renderer draws it with your own components as it streams in.
+                <strong>With A2UI:</strong> The model builds the screen from components in your catalog, and the renderer draws it with your own components as it streams in. In hosts that support MCP Apps, the same A2UI surface can run inside an MCP App.
               </p>
               <p class="gs-with__links">
                 <a href={`${base}/concepts/overview/`}>How A2UI works →</a>
+                <a href={`${base}/guides/a2ui-in-mcp-apps/`}>A2UI in MCP Apps →</a>
               </p>
             </div>
 
@@ -418,11 +419,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
                 </li>
               </ul>
               <p class="gs-with">
-                <strong>With A2UI:</strong> Generated HTML and JS can run as an MCP App inside an A2UI surface, and an A2UI surface can run inside an MCP App.
+                <strong>With A2UI:</strong> Generated HTML and JS can run as an MCP App inside an A2UI surface, next to your native components.
               </p>
               <p class="gs-with__links">
                 <a href={`${base}/guides/mcp-apps-in-a2ui/`}>MCP Apps in A2UI →</a>
-                <a href={`${base}/guides/a2ui-in-mcp-apps/`}>A2UI in MCP Apps →</a>
               </p>
             </div>
           </div>
