@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <section class="a2-section gs-section" id="spectrum">
@@ -23,7 +25,8 @@
         Three patterns. <span class="gs-accent">One generative UI spectrum.</span>
       </h2>
       <p class="gs-sub">
-        Slide across the spectrum to see how the same user prompt turns into different UI outcomes.
+        Slide across the spectrum to see how the same request turns into different UI. A2UI helps at
+        every point on it.
       </p>
     </div>
 
@@ -76,7 +79,7 @@
               tabindex="-1"
               data-stop="static"
             >
-              <span class="gs-stop__title">Strict control</span>
+              <span class="gs-stop__title">Controlled</span>
               <span class="gs-stop__sub">Pre-built widgets</span>
             </button>
 
@@ -90,8 +93,8 @@
               tabindex="0"
               data-stop="a2ui"
             >
-              <span class="gs-stop__title">Flexible composition</span>
-              <span class="gs-stop__sub">Native widget catalog</span>
+              <span class="gs-stop__title">Composition</span>
+              <span class="gs-stop__sub">Native component catalog</span>
             </button>
 
             <button
@@ -104,8 +107,8 @@
               tabindex="-1"
               data-stop="sandbox"
             >
-              <span class="gs-stop__title">Render anything</span>
-              <span class="gs-stop__sub">Sandboxed HTML &amp; JS</span>
+              <span class="gs-stop__title">Code generation</span>
+              <span class="gs-stop__sub">Generated HTML &amp; JS</span>
             </button>
           </div>
 
@@ -218,7 +221,7 @@
                    ========================================================= -->
               <div class="gs-scene" data-scene="sandbox" aria-hidden="true">
                 <div class="gs-wire-pill gs-wire-pill--amber">
-                  <span class="gs-wire-pill__verb">Agent ships</span>
+                  <span class="gs-wire-pill__verb">Agent writes</span>
                   <code>&lt;iframe sandbox&gt; HTML, CSS &amp; JS bundle</code>
                 </div>
 
@@ -320,9 +323,9 @@
 
           <!-- RIGHT: CONSOLIDATED HIGH-LEVEL SUMMARY (1 headline + 3 crisp points, zero eyebrows) -->
           <div class="gs-details">
-            <!-- Slide 1: Strict control -->
+            <!-- Slide 1: Controlled -->
             <div class="gs-detail" data-detail="static" aria-hidden="true">
-              <h3 class="gs-detail__title">Hardcoded screens filled with agent data.</h3>
+              <h3 class="gs-detail__title">The model picks a pre-built widget and fills in its data.</h3>
               <ul class="gs-points">
                 <li class="gs-point">
                   <span class="gs-point__icon gs-point__icon--pos" aria-hidden="true">+</span>
@@ -348,7 +351,7 @@
               </ul>
             </div>
 
-            <!-- Slide 2: Flexible composition (A2UI) -->
+            <!-- Slide 2: Composition -->
             <div class="gs-detail is-active" data-detail="a2ui" aria-hidden="false">
               <h3 class="gs-detail__title">Tailored layouts assembled from your native catalog.</h3>
               <ul class="gs-points">
@@ -376,9 +379,9 @@
               </ul>
             </div>
 
-            <!-- Slide 3: Render anything -->
+            <!-- Slide 3: Code generation -->
             <div class="gs-detail" data-detail="sandbox" aria-hidden="true">
-              <h3 class="gs-detail__title">Self-contained web bundles inside an isolated sandbox.</h3>
+              <h3 class="gs-detail__title">The model writes HTML and JS that runs in a sandbox.</h3>
               <ul class="gs-points">
                 <li class="gs-point">
                   <span class="gs-point__icon gs-point__icon--amber" aria-hidden="true">+</span>
@@ -406,6 +409,42 @@
           </div>
         </div>
       </div>
+
+      <!-- =================================================================
+           HOW A2UI HELPS AT EACH POINT (always visible, one column per stop)
+           ================================================================= -->
+      <ul class="gs-help" aria-label="How A2UI helps at each point on the spectrum">
+        <li class="gs-help__item">
+          <span class="gs-help__stop">Controlled</span>
+          <h3 class="gs-help__title">A2UI renders the widget the model picks.</h3>
+          <p>
+            Register your pre-built widgets as catalog components, or define them as server-side
+            macros. The model chooses one and fills in its data, and A2UI draws it natively on web,
+            Flutter, SwiftUI, and Jetpack Compose from the same message.
+          </p>
+          <a href={`${base}/concepts/macros/`}>Macros →</a>
+        </li>
+        <li class="gs-help__item gs-help__item--best">
+          <span class="gs-help__stop">Composition <em>Where A2UI fits best</em></span>
+          <h3 class="gs-help__title">A2UI builds a new screen for each request.</h3>
+          <p>
+            The model composes the screen from components you approve. A2UI streams it as
+            declarative JSON, binds it to your data model, and renders it with your own components
+            and theme.
+          </p>
+          <a href={`${base}/concepts/overview/`}>How A2UI works →</a>
+        </li>
+        <li class="gs-help__item">
+          <span class="gs-help__stop">Code generation</span>
+          <h3 class="gs-help__title">A2UI keeps generated code inside your brand.</h3>
+          <p>
+            Place generated HTML and JS on an A2UI surface as an MCP App. It runs in a sandbox, while
+            the cards, buttons, and forms around it are your native components, so the screen still
+            looks like your product.
+          </p>
+          <a href={`${base}/guides/mcp-apps-in-a2ui/`}>MCP Apps in A2UI →</a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -1425,6 +1464,93 @@
     font-size: 13.5px;
     line-height: 1.5;
     color: var(--a2-text-secondary);
+  }
+
+  /* =========================================================================
+     HOW A2UI HELPS (three columns under the stage, aligned with the stops)
+     ========================================================================= */
+  .gs-help {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  @media (max-width: 860px) {
+    .gs-help {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .gs-help__item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 22px 20px;
+    border: 1px solid var(--a2-border-strong);
+    border-radius: 8px;
+    background: var(--a2-surface);
+  }
+
+  .gs-help__item--best {
+    border-color: var(--a2-accent-border);
+    background: linear-gradient(180deg, var(--a2-accent-soft), transparent 75%), var(--a2-surface);
+  }
+
+  .gs-help__stop {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--a2-font-mono);
+    font-size: 11px;
+    letter-spacing: var(--a2-tracking-mono-wide);
+    text-transform: uppercase;
+    color: var(--a2-text-muted);
+  }
+
+  .gs-help__stop em {
+    font-style: normal;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--a2-accent-border);
+    color: var(--a2-accent);
+    letter-spacing: 0.04em;
+  }
+
+  .gs-help__title {
+    margin: 0;
+    font-family: var(--a2-font-display);
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: var(--a2-text);
+  }
+
+  .gs-help__item p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--a2-text-secondary);
+  }
+
+  .gs-help__item a {
+    margin-top: auto;
+    padding-top: 4px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--a2-accent);
+    text-decoration: none;
+  }
+
+  .gs-help__item a:hover,
+  .gs-help__item a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   @keyframes gs-shake {
