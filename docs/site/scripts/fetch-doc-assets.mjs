@@ -22,7 +22,9 @@
  * time out intermittently.
  *
  * Each file is checked against the SHA-256 in the manifest. Files already
- * present with the right hash are not downloaded again.
+ * present with the right hash are not downloaded again. A file that still
+ * fails after the retries is reported as a warning and skipped; pages then use
+ * its release URL, so a GitHub outage never fails the build.
  *
  * Usage:
  *   node scripts/fetch-doc-assets.mjs
@@ -102,7 +104,8 @@ export async function downloadVerified(
 
 /**
  * Makes sure every manifest asset exists in `outDir` with the right hash.
- * Returns the number of files downloaded and reused.
+ * Returns the number of files downloaded, reused, and pruned, and the IDs of
+ * assets that could not be downloaded.
  */
 export async function fetchDocAssets({
   manifestPath = DEFAULT_MANIFEST_PATH,
@@ -112,6 +115,7 @@ export async function fetchDocAssets({
   baseDelayMs = 1000,
   timeoutMs = 20_000,
   log = console.log,
+  warn = console.warn,
 } = {}) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   fs.mkdirSync(outDir, {recursive: true});
@@ -119,6 +123,7 @@ export async function fetchDocAssets({
   const validFilenames = new Set();
   let downloaded = 0;
   let reused = 0;
+  const missing = [];
   for (const [id, entry] of Object.entries(manifest.assets || {})) {
     if (
       !entry?.filename ||
@@ -135,14 +140,21 @@ export async function fetchDocAssets({
       continue;
     }
     log(`[fetch-doc-assets] Downloading ${id} (${entry.filename})`);
-    const buffer = await downloadVerified(entry.url, entry.sha256, {
-      fetchImpl,
-      attempts,
-      baseDelayMs,
-      timeoutMs,
-    });
-    fs.writeFileSync(target, buffer);
-    downloaded++;
+    try {
+      const buffer = await downloadVerified(entry.url, entry.sha256, {
+        fetchImpl,
+        attempts,
+        baseDelayMs,
+        timeoutMs,
+      });
+      fs.writeFileSync(target, buffer);
+      downloaded++;
+    } catch (err) {
+      fs.rmSync(target, {force: true});
+      missing.push(id);
+      // The `::warning::` prefix shows up as an annotation in GitHub Actions.
+      warn(`::warning::[fetch-doc-assets] ${err.message}. Pages will link to the release URL.`);
+    }
   }
 
   // Prune any orphaned files in outDir that are not in the manifest
@@ -172,14 +184,14 @@ export async function fetchDocAssets({
     }
   }
 
-  return {downloaded, reused, pruned};
+  return {downloaded, reused, pruned, missing};
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   fetchDocAssets()
-    .then(({downloaded, reused}) => {
+    .then(({downloaded, reused, missing}) => {
       console.log(
-        `[fetch-doc-assets] ${downloaded} downloaded, ${reused} already present in public/${LOCAL_ASSET_DIR}/.`,
+        `[fetch-doc-assets] ${downloaded} downloaded, ${reused} already present in public/${LOCAL_ASSET_DIR}/, ${missing.length} using the release URL.`,
       );
     })
     .catch(err => {

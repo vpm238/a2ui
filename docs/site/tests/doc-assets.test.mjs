@@ -58,14 +58,20 @@ function fakeFetch(responses) {
   return {impl, calls};
 }
 
+const LOCAL = () => true;
+const NOT_LOCAL = () => false;
+
 test('localDocAssetUrl maps manifest release URLs to the local copy under the base path', () => {
-  assert.equal(localDocAssetUrl(URL_A, MANIFEST), '/docs-assets/page--shot.abcd1234.webp');
   assert.equal(
-    localDocAssetUrl(URL_A, MANIFEST, '/preview'),
+    localDocAssetUrl(URL_A, MANIFEST, '', LOCAL),
+    '/docs-assets/page--shot.abcd1234.webp',
+  );
+  assert.equal(
+    localDocAssetUrl(URL_A, MANIFEST, '/preview', LOCAL),
     '/preview/docs-assets/page--shot.abcd1234.webp',
   );
   assert.equal(
-    localDocAssetUrl(URL_A, MANIFEST, '/preview/'),
+    localDocAssetUrl(URL_A, MANIFEST, '/preview/', LOCAL),
     '/preview/docs-assets/page--shot.abcd1234.webp',
   );
   assert.equal(
@@ -80,6 +86,10 @@ test('localDocAssetUrl maps manifest release URLs to the local copy under the ba
     'https://github.com/other-project/other-repo/releases/download/v1/image.png',
   );
   assert.equal(localDocAssetUrl('../local.svg', MANIFEST), '../local.svg');
+});
+
+test('localDocAssetUrl keeps the release URL when the build has no local copy', () => {
+  assert.equal(localDocAssetUrl(URL_A, MANIFEST, '/preview', NOT_LOCAL), URL_A);
 });
 
 test('localDocAssetUrl rejects release URLs that are not in the manifest', () => {
@@ -118,7 +128,7 @@ test('rehypeLocalDocAssets rewrites Markdown images and MDX <img> elements', () 
       },
     ],
   };
-  rehypeLocalDocAssets({manifest: MANIFEST, basePrefix: '/preview'})(tree);
+  rehypeLocalDocAssets({manifest: MANIFEST, basePrefix: '/preview', isLocal: LOCAL})(tree);
   assert.equal(tree.children[0].properties.src, '/preview/docs-assets/page--shot.abcd1234.webp');
   assert.equal(tree.children[0].properties.width, 800);
   assert.equal(tree.children[0].properties.height, 600);
@@ -173,7 +183,7 @@ test('fetchDocAssets downloads missing files, prunes orphans, and reuses matchin
       baseDelayMs: 0,
       log: () => {},
     });
-    assert.deepEqual(result, {downloaded: 1, reused: 0, pruned: 1});
+    assert.deepEqual(result, {downloaded: 1, reused: 0, pruned: 1, missing: []});
     assert.deepEqual(fs.readFileSync(path.join(outDir, 'page--shot.abcd1234.webp')), BYTES);
     assert.equal(fs.existsSync(path.join(outDir, 'orphan.webp')), false);
 
@@ -185,7 +195,7 @@ test('fetchDocAssets downloads missing files, prunes orphans, and reuses matchin
       baseDelayMs: 0,
       log: () => {},
     });
-    assert.deepEqual(again, {downloaded: 0, reused: 1, pruned: 0});
+    assert.deepEqual(again, {downloaded: 0, reused: 1, pruned: 0, missing: []});
     assert.equal(second.calls.length, 0);
 
     // Corrupted existing file is re-downloaded
@@ -198,8 +208,35 @@ test('fetchDocAssets downloads missing files, prunes orphans, and reuses matchin
       baseDelayMs: 0,
       log: () => {},
     });
-    assert.deepEqual(reDownload, {downloaded: 1, reused: 0, pruned: 0});
+    assert.deepEqual(reDownload, {downloaded: 1, reused: 0, pruned: 0, missing: []});
     assert.deepEqual(fs.readFileSync(path.join(outDir, 'page--shot.abcd1234.webp')), BYTES);
+  } finally {
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});
+
+test('fetchDocAssets warns and continues when a download keeps failing', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-assets-test-'));
+  try {
+    const manifestPath = path.join(dir, 'assets-manifest.json');
+    const outDir = path.join(dir, 'out');
+    fs.writeFileSync(manifestPath, JSON.stringify(MANIFEST));
+
+    const warnings = [];
+    const {impl} = fakeFetch([{status: 504}, {status: 504}]);
+    const result = await fetchDocAssets({
+      manifestPath,
+      outDir,
+      fetchImpl: impl,
+      attempts: 2,
+      baseDelayMs: 0,
+      log: () => {},
+      warn: message => warnings.push(message),
+    });
+    assert.deepEqual(result, {downloaded: 0, reused: 0, pruned: 0, missing: ['page/shot']});
+    assert.equal(fs.existsSync(path.join(outDir, 'page--shot.abcd1234.webp')), false);
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /^::warning::.*HTTP 504.*release URL/);
   } finally {
     fs.rmSync(dir, {recursive: true, force: true});
   }

@@ -18,11 +18,20 @@
  * Pages keep writing `docs-assets` release URLs from
  * `docs/site/assets-manifest.json`. This plugin points them at the copies that
  * `scripts/fetch-doc-assets.mjs` downloads into `public/docs-assets/`, for both
- * Markdown images and `<img>` elements in MDX.
+ * Markdown images and `<img>` elements in MDX. An image the build could not
+ * download keeps its release URL.
  */
 
-import {LOCAL_ASSET_DIR} from '../../scripts/fetch-doc-assets.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import {DEFAULT_OUT_DIR, LOCAL_ASSET_DIR} from '../../scripts/fetch-doc-assets.mjs';
 import {normalizeBasePrefix} from '../lib/spec-schemas.mjs';
+
+/** Whether the build downloaded `filename` into public/docs-assets/. */
+export function hasLocalCopy(filename) {
+  return fs.existsSync(path.join(DEFAULT_OUT_DIR, filename));
+}
 
 function getReleasePrefix(manifest) {
   const base =
@@ -36,7 +45,7 @@ function getReleasePrefix(manifest) {
  * is not a release download for this repository, and throws for a release URL missing
  * from the manifest so a typo fails the build instead of hot-linking GitHub.
  */
-export function localDocAssetUrl(url, manifest, basePrefix = '') {
+export function localDocAssetUrl(url, manifest, basePrefix = '', isLocal = hasLocalCopy) {
   if (typeof url !== 'string') return url;
   const prefix = getReleasePrefix(manifest);
   if (!url.startsWith(prefix)) return url;
@@ -48,6 +57,7 @@ export function localDocAssetUrl(url, manifest, basePrefix = '') {
       `Release asset ${url} is not listed in docs/site/assets-manifest.json. Upload it with scripts/upload-doc-asset.mjs.`,
     );
   }
+  if (!isLocal(entry.filename)) return url;
   const cleanBase = normalizeBasePrefix(basePrefix);
   return `${cleanBase}/${LOCAL_ASSET_DIR}/${entry.filename}`;
 }
@@ -60,7 +70,7 @@ export function findManifestEntry(url, manifest) {
   return Object.values(manifest?.assets || {}).find(asset => asset.url === cleanUrl) || null;
 }
 
-function rewrite(node, manifest, basePrefix) {
+function rewrite(node, manifest, basePrefix, isLocal) {
   if (!node || typeof node !== 'object') return;
 
   // Handle raw HTML strings in Markdown (e.g. <img src="..."> in .md files)
@@ -70,14 +80,14 @@ function rewrite(node, manifest, basePrefix) {
     const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`${escapedPrefix}[^\\s"'>]+`, 'g');
     node.value = node.value.replace(regex, matchedUrl =>
-      localDocAssetUrl(matchedUrl, manifest, basePrefix),
+      localDocAssetUrl(matchedUrl, manifest, basePrefix, isLocal),
     );
   }
 
   if (node.type === 'element' && node.tagName === 'img' && node.properties) {
     const originalSrc = node.properties.src;
     const entry = findManifestEntry(originalSrc, manifest);
-    node.properties.src = localDocAssetUrl(originalSrc, manifest, basePrefix);
+    node.properties.src = localDocAssetUrl(originalSrc, manifest, basePrefix, isLocal);
     if (entry) {
       if (entry.width && node.properties.width == null) {
         node.properties.width = entry.width;
@@ -97,7 +107,7 @@ function rewrite(node, manifest, basePrefix) {
     );
     if (srcAttr) {
       const originalSrc = srcAttr.value;
-      srcAttr.value = localDocAssetUrl(originalSrc, manifest, basePrefix);
+      srcAttr.value = localDocAssetUrl(originalSrc, manifest, basePrefix, isLocal);
       const entry = findManifestEntry(originalSrc, manifest);
       if (entry) {
         const hasWidth = node.attributes.some(attr => attr.name === 'width');
@@ -120,12 +130,12 @@ function rewrite(node, manifest, basePrefix) {
     }
   }
   if (Array.isArray(node.children)) {
-    for (const child of node.children) rewrite(child, manifest, basePrefix);
+    for (const child of node.children) rewrite(child, manifest, basePrefix, isLocal);
   }
 }
 
-export function rehypeLocalDocAssets({manifest, basePrefix = ''}) {
+export function rehypeLocalDocAssets({manifest, basePrefix = '', isLocal = hasLocalCopy}) {
   return function transformer(tree) {
-    rewrite(tree, manifest, basePrefix);
+    rewrite(tree, manifest, basePrefix, isLocal);
   };
 }
