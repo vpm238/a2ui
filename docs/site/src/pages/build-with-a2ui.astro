@@ -110,9 +110,10 @@ const stories: Story[] = [
     id: 'gemini-enterprise',
     team: 'Google Cloud',
     product: 'Gemini Enterprise',
-    title: 'Gemini Enterprise runs custom A2UI agents that companies build and register themselves.',
+    title: 'Gemini Enterprise supports A2UI agents that organizations build and register.',
     body: [
-      "A team builds an agent that replies with A2UI, hosts it (for example, on Cloud Run), and registers it in Gemini Enterprise. The agent's replies then render as interactive UI in Gemini Enterprise, using the components in its A2UI component gallery.",
+      'Organizations can register their own agents that respond with A2UI. Gemini Enterprise renders those responses using the components in its A2UI component gallery.',
+      'The Google Cloud documentation covers registering an agent and hosting one on Cloud Run.',
     ],
     docs: [
       {
@@ -142,7 +143,7 @@ const stories: Story[] = [
     id: 'gemini-notebook',
     team: 'Gemini',
     product: 'Gemini Notebook',
-    title: 'Gemini Notebook asks what you want with A2UI cards before it generates.',
+    title: 'Gemini Notebook uses A2UI cards to confirm what you want before it creates a slide deck.',
     body: [
       'Ask Gemini Notebook for a slide deck and it replies with a card that asks two things: presenter slides or a detailed deck, and which topics to focus on. A review card follows with the format, focus and visual style, which you can edit before it generates.',
       'The same cards guide Video Overviews on the web and on mobile.',
@@ -204,8 +205,7 @@ const stories: Story[] = [
           <h1 class="a2-h1 b-h1">Build with <span class="a2-h-accent">A2UI.</span></h1>
           <p class="a2-lead">
             A2UI works whether the model picks a pre-built widget, composes a new screen, or writes
-            its own code. Teams inside Google and across the industry already ship it in their
-            products.
+            its own code. Teams at Google and at other companies use it in their products.
           </p>
           <div class="a2-hero__actions">
             <a
